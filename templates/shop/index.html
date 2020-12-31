@@ -1,79 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    {% load static %}
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
-</head>
-<body>
-    <div class="container">
+{% extends 'shop/base.html' %}
 
-        <div class="row">
-            <div class="col-md-12">
-                <!-- Navigation -->
-                <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                    <a class="navbar-brand" href="#">Navbar</a>
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav">
-                            <li class="nav-item active">
-                                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Features</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Pricing</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link disabled" href="#">Disabled</a>
-                            </li>
-                        </ul>
-                        <ul class="navbar-nav ml-auto">
-                            <li class="nav-item">
-                                <a id="cart" class="nav-link" href="#">Cart(0)</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    Settings
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <form class="card card-sm">
-                    <div class="card-body row no-gutters align-items-center">
-                        <div class="col">
-                            <input type="search" name="item_name" placeholder="Search for products" class="form-control form-control-borderless">
-                        </div>
-                        <div class="col-auto">
-                            <button class="btn btn-success" type="submit">Search</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
+{% block content %}
         {% for product in products %}
             {% if forloop.first %}<div class="row">{% endif %}
             <div class="col-md-3">
                 <div class="card">
                     <a href="{% url 'detail' product.id %}"><img src="{{ product.image }}" class="card-img-top"></a>
                     <div class="card-body">
-                        <div class="card-title">
-                            <a href="{% url 'detail' product.id %}"><h4>{{ product.title }}</h4></a>
-                        </div>
+                        <div id="nm{{product.id}}" class="card-title"><h6>{{ product.title }}</h6></div>
                         <div class="card-text">
                             <h5>$ {{ product.price }}</h5>
                             <p>{{ product.description }}</p>
@@ -103,8 +37,6 @@
             </div>
         </div>
 
-    </div>
-</body>
 <script>
     if(localStorage.getItem('cart')==null){
         var cart = {};
@@ -116,13 +48,34 @@
         console.log('The add to cart button is clicked.')
         let item_id = this.id.toString()
         if(cart[item_id]!=undefined){
-            cart[item_id] = cart[item_id] + 1
+            quantity = cart[item_id][0] + 1;
+            cart[item_id][0] = quantity;
         }
         else{
-            cart[item_id] = 1
+            quantity = 1;
+            var name = document.getElementById("nm"+item_id).innerText;
+            cart[item_id] = [quantity, name];
         }
         localStorage.setItem('cart', JSON.stringify(cart))
         document.getElementById('cart').innerHTML = "Cart(" + Object.keys(cart).length + ")";
     })
+
+    DisplayCart(cart);
+
+    function DisplayCart(cart){
+        var cartString = "";
+        cartString += "<h5>This is your cart</h5>";
+        var cartIndex = 1;
+        for(var x in cart){
+            cartString += cartIndex;
+            cartString += document.getElementById("nm"+x).innerText + "Qty:" + cart[x][0] + "<br/>";
+            cartIndex += 1;
+        }
+        cartString += "<a href='/checkout' class='btn btn-warning' id='checkout'>Checkout</a>";
+        document.getElementById('cart').setAttribute('data-content', cartString);
+        $('[data-toggle="popover"]').popover();
+    }
+
 </script>
-</html>
+
+{% endblock %}
